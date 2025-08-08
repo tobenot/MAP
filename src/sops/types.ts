@@ -9,6 +9,9 @@ export type SopStepBase = {
   tip?: string;
   required?: boolean; // default true
   links?: StepLink[];
+  // Optional copy helpers for this step
+  copyText?: string; // Single copyable text, e.g., a prompt template
+  copyItems?: { label: string; value: string }[]; // Multiple copy targets
 };
 
 export type ChoiceStep = SopStepBase & {
@@ -29,5 +32,7 @@ export interface Sop {
   tags: string[];
   summary: string;
   estimatedMinutes?: number;
+  // Optional tutorial/guide url for this SOP
+  tutorialUrl?: string;
   steps: SopStep[];
 }

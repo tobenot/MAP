@@ -72,6 +72,9 @@ export default function HomePage() {
                 {sop.tags.map((t) => (
                   <span key={t} className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700">#{t}</span>
                 ))}
+                {sop.tutorialUrl && (
+                  <span className="ml-auto text-[11px] px-2 py-0.5 border border-accent-400 text-accent-600 bg-white">含教程</span>
+                )}
               </div>
               {/* Progress */}
               <div className="mt-4">

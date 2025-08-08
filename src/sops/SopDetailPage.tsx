@@ -38,6 +38,29 @@ function SopDetail({ sop }: { sop: Sop }) {
   const stats = compute(sop);
   const [showAllTips, setShowAllTips] = useState<boolean>(true);
 
+  const handleStepContainerClick = (e: React.MouseEvent, stepId: string) => {
+    const target = e.target as HTMLElement;
+    // Ignore clicks originating from interactive elements
+    if (
+      target.closest('a, button, input, textarea, select, label') ||
+      (target as HTMLElement).getAttribute('contenteditable') === 'true'
+    ) {
+      return;
+    }
+    toggleCheck(stepId);
+  };
+
+  const handleKeyToggle = (e: React.KeyboardEvent, stepId: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleCheck(stepId);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try { await navigator.clipboard.writeText(text); } catch {}
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
@@ -48,6 +71,14 @@ function SopDetail({ sop }: { sop: Sop }) {
             <h1 className="text-2xl font-bold text-primary-900">{sop.title}</h1>
           </div>
           <div className="flex items-center gap-2">
+            {sop.tutorialUrl && (
+              <a
+                href={sop.tutorialUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1 border border-accent-500 text-accent-600 bg-white"
+              >教程</a>
+            )}
             <button onClick={toggleFavorite} className={`px-3 py-1 border ${progress.favorited ? 'border-accent-500 text-accent-600' : 'border-primary-300 text-primary-600'} bg-white`}>{progress.favorited ? '★ 已收藏' : '☆ 收藏'}</button>
             <button onClick={reset} className="px-3 py-1 border border-primary-300 text-primary-600 bg-white">重置</button>
             <Link to="/" className="px-3 py-1 border border-primary-300 text-primary-600 bg-white">返回</Link>
@@ -77,8 +108,16 @@ function SopDetail({ sop }: { sop: Sop }) {
       <div className="space-y-4">
         {sop.steps.map((step, idx) => (
           <div key={step.id} className="bg-white border border-primary-200">
-            <div className="px-4 py-3 flex items-start gap-3">
+            <div
+              className="px-4 py-3 flex items-start gap-3 cursor-pointer"
+              onClick={(e) => handleStepContainerClick(e, step.id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => handleKeyToggle(e, step.id)}
+              aria-pressed={Boolean(progress.checked[step.id])}
+            >
               <input
+                id={`${sop.id}-${step.id}-checkbox`}
                 type="checkbox"
                 checked={Boolean(progress.checked[step.id])}
                 onChange={() => toggleCheck(step.id)}
@@ -87,7 +126,9 @@ function SopDetail({ sop }: { sop: Sop }) {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <div className="text-xs text-primary-500">{idx + 1}</div>
-                  <div className="text-primary-900 font-medium">{step.title}</div>
+                  <label htmlFor={`${sop.id}-${step.id}-checkbox`} className="text-primary-900 font-medium hover:text-accent-600">
+                    {step.title}
+                  </label>
                   {step.required === false && <span className="text-xs text-primary-500">(可选)</span>}
                 </div>
                 {step.tip && showAllTips && (
@@ -96,9 +137,39 @@ function SopDetail({ sop }: { sop: Sop }) {
                 {step.links && step.links.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {step.links.map((l) => (
-                      <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="text-xs text-accent-600 underline">
-                        {l.text}
-                      </a>
+                      <div key={l.url} className="flex items-center gap-2">
+                        <a href={l.url} target="_blank" rel="noreferrer" className="text-xs text-accent-600 underline">
+                          {l.text}
+                        </a>
+                        <button
+                          className="text-xs px-2 py-0.5 border border-primary-300 text-primary-600 bg-white"
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard(l.url); }}
+                        >复制链接</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Copy helpers */}
+                {step.copyText && (
+                  <div className="mt-2">
+                    <textarea readOnly value={step.copyText} rows={3} className="w-full px-3 py-2 border border-primary-200 bg-primary-50 text-sm" />
+                    <button
+                      className="mt-2 text-xs px-2 py-1 border border-primary-300 text-primary-600 bg-white"
+                      onClick={(e) => { e.stopPropagation(); copyToClipboard(step.copyText!); }}
+                    >复制</button>
+                  </div>
+                )}
+                {step.copyItems && step.copyItems.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {step.copyItems.map((ci, i) => (
+                      <div key={`${step.id}-ci-${i}`} className="flex items-center justify-between gap-3">
+                        <div className="text-sm text-primary-700">{ci.label}</div>
+                        <button
+                          className="text-xs px-2 py-1 border border-primary-300 text-primary-600 bg-white"
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard(ci.value); }}
+                        >复制</button>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -122,7 +193,7 @@ function SopDetail({ sop }: { sop: Sop }) {
                 )}
 
                 {/* Notes */}
-                <div className="mt-3">
+                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
                   <textarea
                     placeholder="备注...（可选）"
                     className="w-full px-3 py-2 border border-primary-200 bg-primary-50 focus:bg-white focus:border-accent-500 outline-none text-sm"
