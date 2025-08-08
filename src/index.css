@@ -14,7 +14,8 @@
   
   /* Remove default button styling to use Tailwind classes */
   button {
-    @apply border-0 bg-transparent p-0 font-inherit cursor-pointer;
+    @apply border-0 bg-transparent p-0 cursor-pointer;
+    font: inherit;
   }
   
   /* Clean focus styles */
