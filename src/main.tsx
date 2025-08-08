@@ -6,8 +6,8 @@ import App from './App'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-    <App />
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <App />
     </BrowserRouter>
   </StrictMode>,
 )
