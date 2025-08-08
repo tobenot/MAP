@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useAppStore } from '../stores/appStore';
+import CopyButton from '../components/CopyButton';
 
 // 假设支持的语言列表
 const supportedLanguages = [
@@ -173,12 +174,9 @@ export default function TranslationWorkflow() {
                   {translationResult}
                 </p>
               </div>
-              <button 
-                onClick={() => navigator.clipboard.writeText(translationResult)}
-                className="mt-4 bg-success-500 hover:bg-success-600 text-white font-medium py-2 px-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2"
-              >
-                复制结果
-              </button>
+              <div className="mt-4">
+                <CopyButton text={translationResult} label="复制结果" copiedLabel="已复制" className="border-success-500 text-success-700" />
+              </div>
             </div>
           </div>
         )}
@@ -199,12 +197,7 @@ export default function TranslationWorkflow() {
                 className="w-full px-4 py-3 border border-accent-200 bg-accent-50 text-accent-900 font-mono text-sm focus:outline-none"
               />
               <div className="flex space-x-3 mt-4">
-                <button 
-                  onClick={() => navigator.clipboard.writeText(manualPrompt)}
-                  className="bg-accent-500 hover:bg-accent-600 text-white font-medium py-2 px-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
-                >
-                  复制提示词
-                </button>
+                <CopyButton text={manualPrompt} label="复制提示词" copiedLabel="已复制" />
                 <button 
                   onClick={() => setManualPrompt('')}
                   className="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"

@@ -1,4 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { WORKFLOWS } from '../workflows/registry';
 
 export default function Layout() {
   const location = useLocation();
@@ -32,8 +33,9 @@ export default function Layout() {
             {/* Navigation */}
             <div className="flex items-center space-x-1">
               <NavLink to="/" isActive={isActiveRoute('/')}>首页</NavLink>
-              <NavLink to="/translate" isActive={isActiveRoute('/translate')}>翻译工作流</NavLink>
-              <NavLink to="/novel-writer" isActive={isActiveRoute('/novel-writer')}>小说写作</NavLink>
+              {WORKFLOWS.filter(w => w.showInNav).map((wf) => (
+                <NavLink key={wf.path} to={wf.path} isActive={isActiveRoute(wf.path)}>{wf.title}</NavLink>
+              ))}
             </div>
           </div>
         </nav>

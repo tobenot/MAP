@@ -1,17 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
+import { Suspense } from 'react';
 import Layout from './components/Layout';
 import HomePage from './workflows/HomePage';
-import TranslationWorkflow from './workflows/TranslationWorkflow'; // 导入实际的组件
-import NovelWriterWorkflow from './workflows/NovelWriterWorkflow'; // 导入实际的组件
 import SopDetailPage from './sops/SopDetailPage';
-
-// 临时的占位符组件，直到我们创建实际的工作流组件
-const PlaceholderWorkflow = ({ title }: { title: string }) => (
-  <div>
-    <h2 className="text-2xl font-semibold mb-3">{title}</h2>
-    <p>此工作流正在建设中...</p>
-  </div>
-);
+import { WORKFLOWS } from './workflows/registry';
 
 function App() {
   return (
@@ -19,15 +11,17 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="sop/:id" element={<SopDetailPage />} />
-        <Route 
-          path="translate" 
-          element={<TranslationWorkflow />} // 使用实际的组件替换占位符
-        />
-        <Route 
-          path="novel-writer" 
-          element={<NovelWriterWorkflow />} // 使用实际的组件替换占位符
-        />
-        {/* 其他工作流的路由 */}
+        {WORKFLOWS.map((wf) => (
+          <Route
+            key={wf.path}
+            path={wf.path.slice(1)}
+            element={
+              <Suspense fallback={<div className="p-8 text-center text-primary-600">加载中...</div>}>
+                <wf.component />
+              </Suspense>
+            }
+          />
+        ))}
         <Route 
           path="*" 
           element={<div className="text-center py-10"><h1 className="text-2xl">404 - 页面未找到</h1></div>} 
