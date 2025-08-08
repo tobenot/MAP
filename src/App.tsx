@@ -3,7 +3,7 @@ import Layout from './components/Layout';
 import HomePage from './workflows/HomePage';
 import TranslationWorkflow from './workflows/TranslationWorkflow'; // 导入实际的组件
 import NovelWriterWorkflow from './workflows/NovelWriterWorkflow'; // 导入实际的组件
-// import NovelWriterWorkflow from './workflows/NovelWriterWorkflow'; // 稍后创建
+import SopDetailPage from './sops/SopDetailPage';
 
 // 临时的占位符组件，直到我们创建实际的工作流组件
 const PlaceholderWorkflow = ({ title }: { title: string }) => (
@@ -18,6 +18,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
+        <Route path="sop/:id" element={<SopDetailPage />} />
         <Route 
           path="translate" 
           element={<TranslationWorkflow />} // 使用实际的组件替换占位符
