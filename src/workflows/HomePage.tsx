@@ -1,138 +1,89 @@
 import { Link } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { SOPS } from '../sops/data';
+import type { Sop } from '../sops/types';
+
+function getProgressPercent(sop: Sop): number {
+  try {
+    const raw = localStorage.getItem(`sop:${sop.id}:progress`);
+    if (!raw) return 0;
+    const data = JSON.parse(raw) as { checked: Record<string, boolean> };
+    const requiredTotal = sop.steps.filter((s) => s.required !== false).length;
+    const requiredDone = sop.steps.filter((s) => s.required !== false && data.checked?.[s.id]).length;
+    return requiredTotal === 0 ? 100 : Math.round((requiredDone / requiredTotal) * 100);
+  } catch {
+    return 0;
+  }
+}
 
 export default function HomePage() {
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<string>('全部');
+  const categories = useMemo(() => ['全部', ...Array.from(new Set(SOPS.map((s) => s.category)))], []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return SOPS.filter((s) =>
+      (category === '全部' || s.category === category) &&
+      (q === '' || s.title.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q) || s.tags.join(' ').toLowerCase().includes(q))
+    );
+  }, [query, category]);
+
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Workflow Cards */}
+    <div className="max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-primary-900 mb-2">SOP 库 · 个人机械飞升程序</h1>
+        <p className="text-primary-600">全览展示与流动进度，按需挑选合适的SOP启动。</p>
+      </div>
+
+      {/* Controls */}
+      <div className="bg-white border border-primary-200 p-4 mb-6 grid md:grid-cols-3 gap-4 items-center">
+        <input
+          type="text"
+          placeholder="搜索标题/标签/简介..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="md:col-span-2 w-full px-3 py-2 border border-primary-200 bg-primary-50 focus:bg-white focus:border-accent-500 outline-none"
+        />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full px-3 py-2 border border-primary-200 bg-primary-50 focus:bg-white focus:border-accent-500 outline-none"
+        >
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* SOP Cards */}
       <div className="grid md:grid-cols-2 gap-6 mb-12">
-        <WorkflowCard
-          title="翻译工作流"
-          description="高效的多语言翻译处理系统"
-          path="/translate"
-          status="active"
-          icon="🔄"
-        />
-        <WorkflowCard
-          title="小说写作"
-          description="创意写作与内容生成工具"
-          path="/novel-writer"
-          status="active"
-          icon="✍️"
-        />
-        <WorkflowCard
-          title="数据分析"
-          description="智能数据处理与可视化"
-          path="/analytics"
-          status="development"
-          icon="📊"
-        />
-        <WorkflowCard
-          title="自动化脚本"
-          description="任务自动化与流程优化"
-          path="/automation"
-          status="development"
-          icon="⚡"
-        />
+        {filtered.map((sop) => (
+          <Link key={sop.id} to={`/sop/${sop.id}`} className="block group">
+            <div className="bg-white border border-primary-200 p-5 hover:border-accent-300 hover:shadow-md transition-all h-full">
+              <div className="flex items-start justify-between mb-2">
+                <div className="text-sm text-primary-500">{sop.category}</div>
+                <div className="text-xs text-primary-500">约 {sop.estimatedMinutes ?? '-'} 分钟</div>
+              </div>
+              <h3 className="text-lg font-semibold text-primary-900 group-hover:text-accent-600">{sop.title}</h3>
+              <p className="text-primary-600 text-sm mt-1">{sop.summary}</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {sop.tags.map((t) => (
+                  <span key={t} className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700">#{t}</span>
+                ))}
+              </div>
+              {/* Progress */}
+              <div className="mt-4">
+                <div className="w-full h-2 bg-primary-200">
+                  <div className="h-2 bg-accent-500" style={{ width: `${getProgressPercent(sop)}%` }} />
+                </div>
+                <div className="text-xs text-primary-500 mt-1">进度 {getProgressPercent(sop)}%</div>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
-      {/* System Status */}
-      <div className="bg-white border border-primary-200 p-6">
-        <h2 className="text-xl font-semibold text-primary-900 mb-4 flex items-center">
-          <div className="w-3 h-3 bg-success-500 mr-3"></div>
-          系统状态
-        </h2>
-        <div className="grid sm:grid-cols-3 gap-4 text-sm">
-          <div className="flex justify-between items-center">
-            <span className="text-primary-600">运行时间</span>
-            <span className="font-mono text-primary-900">24:07:15</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-primary-600">活跃模块</span>
-            <span className="font-mono text-primary-900">2/4</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-primary-600">系统负载</span>
-            <span className="font-mono text-success-600">低</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Workflow Card Component
-interface WorkflowCardProps {
-  title: string;
-  description: string;
-  path: string;
-  status: 'active' | 'development' | 'maintenance';
-  icon: string;
-}
-
-function WorkflowCard({ title, description, path, status, icon }: WorkflowCardProps) {
-  const isActive = status === 'active';
-  
-  const statusConfig = {
-    active: { 
-      color: 'bg-success-500', 
-      text: '可用',
-      textColor: 'text-success-600'
-    },
-    development: { 
-      color: 'bg-warning-500', 
-      text: '开发中',
-      textColor: 'text-warning-600'
-    },
-    maintenance: { 
-      color: 'bg-danger-500', 
-      text: '维护中',
-      textColor: 'text-danger-600'
-    }
-  };
-
-  const config = statusConfig[status];
-
-  const CardContent = (
-    <div className={`
-      group bg-white border border-primary-200 p-6 h-full
-      transition-all duration-200
-      ${isActive 
-        ? 'hover:border-accent-300 hover:shadow-md cursor-pointer' 
-        : 'opacity-75 cursor-not-allowed'
-      }
-    `}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="text-2xl">{icon}</div>
-        <div className="flex items-center space-x-2">
-          <div className={`w-2 h-2 ${config.color}`}></div>
-          <span className={`text-xs font-medium ${config.textColor}`}>
-            {config.text}
-          </span>
-        </div>
-      </div>
-      
-      <h3 className="text-lg font-semibold text-primary-900 mb-2 group-hover:text-accent-600 transition-colors">
-        {title}
-      </h3>
-      
-      <p className="text-primary-600 text-sm leading-relaxed">
-        {description}
-      </p>
-      
-      {isActive && (
-        <div className="mt-4 text-accent-600 text-sm font-medium">
-          启动模块 →
-        </div>
-      )}
-    </div>
-  );
-
-  return isActive ? (
-    <Link to={path} className="block h-full">
-      {CardContent}
-    </Link>
-  ) : (
-    <div className="h-full">
-      {CardContent}
     </div>
   );
 } 

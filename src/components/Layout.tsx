@@ -31,15 +31,9 @@ export default function Layout() {
             
             {/* Navigation */}
             <div className="flex items-center space-x-1">
-              <NavLink to="/" isActive={isActiveRoute('/')}>
-                首页
-              </NavLink>
-              <NavLink to="/translate" isActive={isActiveRoute('/translate')}>
-                翻译工作流
-              </NavLink>
-              <NavLink to="/novel-writer" isActive={isActiveRoute('/novel-writer')}>
-                小说写作
-              </NavLink>
+              <NavLink to="/" isActive={isActiveRoute('/')}>首页</NavLink>
+              <NavLink to="/translate" isActive={isActiveRoute('/translate')}>翻译工作流</NavLink>
+              <NavLink to="/novel-writer" isActive={isActiveRoute('/novel-writer')}>小说写作</NavLink>
             </div>
           </div>
         </nav>

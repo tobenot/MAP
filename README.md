@@ -1,54 +1,47 @@
-# React + TypeScript + Vite
+# MAP · 个人机械飞升程序
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个轻量的「个人效率 SOP 库」网站：当你想做某件事时，打开对应 SOP，看到完整步骤清单与提示，一边执行一边勾选，实时查看进度。支持搜索、分类与收藏。
 
-Currently, two official plugins are available:
+## 功能特性（MVP）
+- 全览展示：SOP 详情页一次性展示全部步骤，不强制逐步点击。
+- 流动进度：必选步骤完成度（百分比）+ 可选步骤计数。
+- 搜索与分类：首页可按关键字搜索、按分类筛选，卡片显示预估时长与标签。
+- 本地持久化：进度、选择与备注存储在 LocalStorage，自动恢复。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 目录结构（核心）
+- `src/sops/types.ts`：SOP/步骤类型定义
+- `src/sops/data.ts`：内置 SOP 数据（可扩展）
+- `src/sops/SopDetailPage.tsx`：SOP 详情页（全览+进度）
+- `src/workflows/HomePage.tsx`：首页（SOP 列表/搜索/分类）
+- `src/hooks/useLocalStorage.ts` / `src/hooks/useSopProgress.ts`：LocalStorage 与进度计算
 
-## Expanding the ESLint configuration
+## 开发与运行
+```bash
+# 安装依赖（若未安装）
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# 开发模式
+yarn dev # 或 npm run dev / pnpm dev
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+# 构建
+npm run build
+
+# 预览构建
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+访问地址（开发默认）：`http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 如何新增一个 SOP
+1. 打开 `src/sops/data.ts`
+2. 参照现有条目，新增一个对象：
+   - `id`：唯一标识（用于路由与本地存储）
+   - `title`、`category`、`tags[]`、`summary`、`estimatedMinutes`
+   - `steps[]`：每步包含 `id`、`title`、可选 `tip`、`required`（默认true）；如为选择题类型，设置 `type: 'choice'` 和 `options[]`
+3. 保存后自动出现在首页列表，并可通过 `/sop/:id` 访问详情。
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 设计文档
+详见 `docs/design.md`
+
+## 许可证
+MIT
