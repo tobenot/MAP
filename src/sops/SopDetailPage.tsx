@@ -3,6 +3,7 @@ import { SOPS } from './data';
 import type { ChoiceStep, Sop } from './types';
 import { useSopProgress } from '../hooks/useSopProgress';
 import { useMemo, useState } from 'react';
+import CopyButton from '../components/CopyButton';
 
 function ProgressBar({ percent }: { percent: number }) {
   return (
@@ -77,12 +78,21 @@ function SopDetail({ sop }: { sop: Sop }) {
       <div className="space-y-4">
         {sop.steps.map((step, idx) => (
           <div key={step.id} className="bg-white border border-primary-200">
-            <div className="px-4 py-3 flex items-start gap-3">
+            <div
+              className="px-4 py-3 flex items-start gap-3 cursor-pointer select-none"
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest('input, textarea, button, a, select, label')) return;
+                toggleCheck(step.id);
+              }}
+              role="button"
+              aria-pressed={Boolean(progress.checked[step.id])}
+            >
               <input
                 type="checkbox"
                 checked={Boolean(progress.checked[step.id])}
                 onChange={() => toggleCheck(step.id)}
-                className="mt-1 w-4 h-4 border-primary-300"
+                className="mt-1 w-5 h-5 border-primary-300"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -91,14 +101,22 @@ function SopDetail({ sop }: { sop: Sop }) {
                   {step.required === false && <span className="text-xs text-primary-500">(可选)</span>}
                 </div>
                 {step.tip && showAllTips && (
-                  <div className="text-sm text-primary-600 mt-1">{step.tip}</div>
+                  <div className="text-sm text-primary-600 mt-1 whitespace-pre-wrap">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">{step.tip}</div>
+                      <CopyButton text={step.tip} label="复制提示" copiedLabel="已复制" />
+                    </div>
+                  </div>
                 )}
                 {step.links && step.links.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-2 items-center">
                     {step.links.map((l) => (
-                      <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="text-xs text-accent-600 underline">
-                        {l.text}
-                      </a>
+                      <span key={l.url} className="inline-flex items-center gap-2">
+                        <a href={l.url} target="_blank" rel="noreferrer" className="text-xs text-accent-600 underline">
+                          {l.text}
+                        </a>
+                        <CopyButton text={l.url} label="复制链接" copiedLabel="已复制" />
+                      </span>
                     ))}
                   </div>
                 )}
@@ -107,7 +125,7 @@ function SopDetail({ sop }: { sop: Sop }) {
                 {'type' in step && step.type === 'choice' && (
                   <div className="mt-2">
                     {(step as ChoiceStep).options.map((opt) => (
-                      <label key={opt} className="mr-4 text-sm text-primary-700">
+                      <label key={opt} className="mr-4 text-sm text-primary-700 cursor-pointer select-none">
                         <input
                           type="radio"
                           name={`${sop.id}-${step.id}`}
@@ -123,6 +141,16 @@ function SopDetail({ sop }: { sop: Sop }) {
 
                 {/* Notes */}
                 <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-primary-500">备注（可选）</span>
+                    {Boolean(progress.notes[step.id]) && (
+                      <CopyButton
+                        text={progress.notes[step.id] ?? ''}
+                        label="复制备注"
+                        copiedLabel="已复制"
+                      />
+                    )}
+                  </div>
                   <textarea
                     placeholder="备注...（可选）"
                     className="w-full px-3 py-2 border border-primary-200 bg-primary-50 focus:bg-white focus:border-accent-500 outline-none text-sm"
