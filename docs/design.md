@@ -12,23 +12,15 @@
 - SOP
   - id, title, category, tags[], summary, estimatedMinutes
   - steps: Step[]
-- Step
-  - 基础字段：id, title, tip?, required?(默认true), links?
-  - 类型：
-    - simple（默认）
+    - simple：title/tip/links/required
     - choice：options[]
 
-详见 `src/sops/types.ts` 与样例 `src/sops/data.ts`。
+详见 `src/sops/types.ts` 与样例 `src/sops/items/*.ts`（由 `src/sops/data.ts` 自动聚合）。
 
 ## 关键交互
-- 详情页
-  - 全量展示步骤清单；每步可勾选完成、填写备注；choice 步骤可选项；支持展开/折叠提示。
-  - 顶部进度条：必选完成度 requiredDone/requiredTotal -> 百分比；可选步骤另计数。
-  - 操作：收藏、重置、返回列表。
-- 首页
-  - 列表卡片：分类、标题、简介、标签、预估时长；展示本地进度条。
-  - 搜索：匹配 标题/简介/标签（前端模糊包含）。
-  - 分类筛选：下拉选择分类或“全部”。
+
+- 详情页：全览全部步骤，支持勾选与选择题；展示必选进度百分比，可选计数。
+- 首页：列表展示各 SOP，支持搜索与分类筛选；卡片展示预计时长与标签。
 
 ## 本地持久化
 - 键：`sop:${sopId}:progress`
@@ -40,20 +32,15 @@
 - 路由：React Router（主页 `/`，详情 `/sop/:id`）
 - 状态：页面内局部状态 + LocalStorage；无需全局后端。
 
-## 非目标（MVP以外）
-- 复杂的流程引擎（并行/子流程/权限）
-- 服务端账户体系与云同步
-- 富文本/Markdown 渲染器与版本历史
-
-## 后续演进方向
-- 搜索增强：前端索引（minisearch/lunr）与权重排序
+## 后续迭代方向（非 MVP）
 - 分类/标签多选筛选与收藏置顶、最近使用排序
 - 分享链接（带当前勾选状态的只读视图）与打印/导出 Markdown
 - SOP 内容外置（YAML/Markdown Frontmatter），引入解析器统一渲染
 
 ## 目录结构（相关）
 - `src/sops/types.ts`：类型定义
-- `src/sops/data.ts`：SOP 数据样例
+- `src/sops/items/*.ts`：SOP 数据样例（单文件一条）
+- `src/sops/data.ts`：聚合所有 SOP
 - `src/sops/SopDetailPage.tsx`：详情页
 - `src/workflows/HomePage.tsx`：主页（SOP 列表）
 - `src/hooks/useLocalStorage.ts` / `src/hooks/useSopProgress.ts`：本地持久化与进度管理

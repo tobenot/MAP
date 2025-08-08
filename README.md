@@ -6,42 +6,50 @@
 - 全览展示：SOP 详情页一次性展示全部步骤，不强制逐步点击。
 - 流动进度：必选步骤完成度（百分比）+ 可选步骤计数。
 - 搜索与分类：首页可按关键字搜索、按分类筛选，卡片显示预估时长与标签。
-- 本地持久化：进度、选择与备注存储在 LocalStorage，自动恢复。
 
 ## 目录结构（核心）
 - `src/sops/types.ts`：SOP/步骤类型定义
-- `src/sops/data.ts`：内置 SOP 数据（可扩展）
+- `src/sops/items/*.ts`：内置 SOP 数据（每个文件一个 SOP）
+- `src/sops/data.ts`：自动聚合所有 SOP 项
 - `src/sops/SopDetailPage.tsx`：SOP 详情页（全览+进度）
 - `src/workflows/HomePage.tsx`：首页（SOP 列表/搜索/分类）
 - `src/hooks/useLocalStorage.ts` / `src/hooks/useSopProgress.ts`：LocalStorage 与进度计算
 
 ## 开发与运行
-```bash
-# 安装依赖（若未安装）
-npm install
 
-# 开发模式
-yarn dev # 或 npm run dev / pnpm dev
-
-# 构建
-npm run build
-
-# 预览构建
-npm run preview
-```
+- 安装依赖：`npm i`
+- 本地开发：`npm run dev`
+- 构建产物：`npm run build`
+- 预览构建：`npm run preview`
 
 访问地址（开发默认）：`http://localhost:5173`
 
 ## 如何新增一个 SOP
-1. 打开 `src/sops/data.ts`
-2. 参照现有条目，新增一个对象：
-   - `id`：唯一标识（用于路由与本地存储）
-   - `title`、`category`、`tags[]`、`summary`、`estimatedMinutes`
-   - `steps[]`：每步包含 `id`、`title`、可选 `tip`、`required`（默认true）；如为选择题类型，设置 `type: 'choice'` 和 `options[]`
-3. 保存后自动出现在首页列表，并可通过 `/sop/:id` 访问详情。
+1. 在 `src/sops/items/` 新建一个文件，例如 `my-sop.ts`
+2. 导出一个 `Sop` 对象作为默认导出：
+
+```ts
+import type { Sop } from '../types';
+
+const sop: Sop = {
+  id: 'my-sop',
+  title: '我的 SOP',
+  category: '分类',
+  tags: ['标签A', '标签B'],
+  summary: '一句话简介',
+  estimatedMinutes: 30,
+  steps: [
+    { id: 's1', title: '第一步', required: true },
+  ],
+};
+
+export default sop;
+```
+3. 保存后会被 `src/sops/data.ts` 自动聚合，自动出现在首页列表，并可通过 `/sop/:id` 访问详情。
 
 ## 设计文档
-详见 `docs/design.md`
+
+详见 `docs/` 目录。
 
 ## 许可证
 MIT
